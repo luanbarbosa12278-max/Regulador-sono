@@ -146,59 +146,72 @@ function update(dt){if(!playing)return;const activelyPedaling=mode==='bike'?(!!d
 // Layered, deterministic pixel-art turbo flames; no allocations or particle state required.
 function drawSpeedAboveCyclist(){
  ctx.save();
- ctx.font="15px 'Press Start 2P', monospace";
- ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
- const cx=220,cy=194,label=speed.toFixed(1)+' KM/H';
- const heat=Math.max(0,Math.min(1,(speed-18)/24)),t=performance.now()/1000;
+ ctx.font="15px 'Press Start 2P', monospace";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+ const cx=220,cy=194,label=speed.toFixed(1)+' KM/H',t=performance.now()/1000;
+ const heat=Math.max(0,Math.min(1,(speed-18)/24));
  if(heat>0){
-   const w=ctx.measureText(label).width+20,left=cx-w/2;
-   // Organic flame tongues: tapered silhouettes rising from behind the digits.
-   const base=cy+10,n=20;
-   for(let i=0;i<n;i++){
-     const x=left+(i+.5)*w/n;
-     const drift=Math.sin(t*5.8+i*1.43)*4;
-     const sway=Math.sin(t*8.3+i*2.4)*3;
-     const flameH=(19+heat*37)*(.55+.45*(.5+.5*Math.sin(t*9.4+i*1.82)));
-     const tipY=base-flameH+sway;
-     const outerW=7+heat*3;
-     // Each tongue has a broad lower body and a narrow, flickering tip.
-     ctx.fillStyle='#b72d21';
-     ctx.beginPath();ctx.moveTo(x-outerW,base);ctx.lineTo(x-outerW*.8,base-flameH*.42);
-     ctx.quadraticCurveTo(x-outerW*.6+drift,base-flameH*.77,x+drift,tipY);
-     ctx.quadraticCurveTo(x+outerW*.7+drift,base-flameH*.62,x+outerW*.8,base-flameH*.32);
-     ctx.lineTo(x+outerW,base);ctx.closePath();ctx.fill();
-     const innerH=flameH*.79;
-     ctx.fillStyle='#ff7826';
-     ctx.beginPath();ctx.moveTo(x-outerW*.65,base);ctx.quadraticCurveTo(x-outerW*.5,base-innerH*.5,x+drift*.6,base-innerH);
-     ctx.quadraticCurveTo(x+outerW*.48,base-innerH*.48,x+outerW*.65,base);ctx.closePath();ctx.fill();
-     ctx.fillStyle='#ffd44b';
-     ctx.beginPath();ctx.moveTo(x-outerW*.35,base);ctx.quadraticCurveTo(x-outerW*.28,base-innerH*.32,x+drift*.25,base-innerH*.65);
-     ctx.quadraticCurveTo(x+outerW*.28,base-innerH*.25,x+outerW*.35,base);ctx.closePath();ctx.fill();
-     if(heat>.55&&i%3===0){ctx.fillStyle='#fff3a2';ctx.fillRect(Math.round(x-1),Math.round(base-innerH*.32),3,Math.round(innerH*.2))}
+  const w=ctx.measureText(label).width+20,left=cx-w/2,topBase=cy+7;
+  // Warm translucent halo behind the entire readout, with no opaque background panel.
+  const glow=ctx.createRadialGradient(cx,cy-7,3,cx,cy-7,w*.65);
+  glow.addColorStop(0,'rgba(255,226,93,'+(.2+heat*.3)+')');
+  glow.addColorStop(.55,'rgba(255,100,25,'+(.12+heat*.17)+')');
+  glow.addColorStop(1,'rgba(255,55,10,0)');
+  ctx.fillStyle=glow;ctx.fillRect(left-20,cy-75,w+40,110);
+  // Curved tongues are staggered and phase-shifted to resemble real dancing fire.
+  function tongue(x,base,height,wide,phase){
+   const sway=Math.sin(t*6.4+phase)*wide*.55;
+   for(let layer=0;layer<3;layer++){
+    const scale=[1,.76,.49][layer],h=height*scale;
+    const spread=wide*scale;
+    ctx.fillStyle=['#d6371e','#ff8527','#ffe16a'][layer];
+    ctx.beginPath();
+    ctx.moveTo(x-spread,base);
+    ctx.bezierCurveTo(x-spread*1.12,base-h*.42,x+sway-spread*.6,base-h*.82,x+sway,base-h);
+    ctx.bezierCurveTo(x+sway+spread*.36,base-h*.68,x+spread*1.08,base-h*.4,x+spread,base);
+    ctx.closePath();ctx.fill();
    }
-   // Spark particles rising from the fire.
-   for(let i=0;i<Math.floor(5+heat*15);i++){
-     const life=(t*(.8+heat*.8)+i*.273)%1;
-     const x=left+((i*31.7+Math.sin(t+i)*9)%w+w)%w;
-     const y=base-16-life*(29+heat*46);
-     ctx.globalAlpha=(1-life)*(.4+heat*.6);
-     ctx.fillStyle=i%3===0?'#fff4a5':i%2?'#ffb347':'#ff5b2c';
-     ctx.fillRect(Math.round(x),Math.round(y),i%4===0?3:2,i%4===0?4:2);
-   }
-   ctx.globalAlpha=1;
+   if(heat>.6){ctx.fillStyle='#fff4ad';ctx.fillRect(Math.round(x-1),Math.round(base-height*.24),2,Math.round(height*.15))}
+  }
+  const n=18;
+  for(let i=0;i<n;i++){
+   const x=left+(i+.5)*w/n;
+   const flutter=.72+.28*Math.sin(t*10.3+i*2.12);
+   const h=(18+heat*42)*flutter*(.84+.16*Math.sin(i*1.41+t*3));
+   tongue(x,topBase,h,4.4+heat*2.3,i*1.63);
+  }
+  // Smaller flames lick upward from BELOW the number, without obscuring it.
+  for(let i=0;i<14;i++){
+   const x=left+6+(i+.5)*(w-12)/14;
+   const flutter=.7+.3*Math.sin(t*9.5+i*2.31);
+   const h=(6+heat*11)*flutter;
+   tongue(x,cy+23,h,3.2+heat*.8,i*2.17+4);
+  }
+  // Pixel embers with varied upward drift and fading.
+  const sparks=Math.floor(7+heat*23);
+  for(let i=0;i<sparks;i++){
+   const life=(t*(.55+heat*.85)+i*.381)%1;
+   const x=left+((i*37.91+Math.sin(t*2+i*3)*10)%w+w)%w;
+   const y=cy-3-life*(36+heat*58);
+   ctx.globalAlpha=(1-life)*(.35+heat*.65);
+   ctx.fillStyle=i%5===0?'#fff8c6':i%2===0?'#ffba42':'#f35a24';
+   const size=i%5===0?3:2;
+   ctx.fillRect(Math.round(x),Math.round(y),size,size+(i%4===0?2:0));
+  }
+  ctx.globalAlpha=1;
+  // Tiny heat streaks at full sprint.
+  if(heat>.7){ctx.fillStyle='#ffcc58';for(let i=0;i<5;i++){
+   const x=left+((t*44+i*39)%w);
+   ctx.fillRect(Math.round(x),Math.round(cy-35-i%3*10),3+Math.round(heat*3),2);
+  }}
  }
- // Thick dark outline remains readable on top of the flames.
- ctx.lineWidth=5;ctx.strokeStyle='#070710';ctx.strokeText(label,cx,cy);
+ // Crisp black outline separates the animated rainbow digits from the flames.
+ ctx.lineWidth=6;ctx.strokeStyle='#08060d';ctx.strokeText(label,cx,cy);
  if(heat>.04){
-   // Animated RGB rainbow sweeps continuously across the characters.
-   const width=ctx.measureText(label).width;
-   const rgb=ctx.createLinearGradient(cx-width/2,0,cx+width/2,0);
-   const shift=(t*.3)%1;
-   for(let i=0;i<=12;i++){
-     const hue=((i/12+shift)%1)*360;
-     rgb.addColorStop(i/12,'hsl('+hue+',100%,70%)');
-   }
-   ctx.fillStyle=rgb;
+  const width=ctx.measureText(label).width;
+  const rgb=ctx.createLinearGradient(cx-width/2,0,cx+width/2,0);
+  const shift=t*.22;
+  for(let i=0;i<=16;i++)rgb.addColorStop(i/16,'hsl('+(((i/16+shift)%1)*360)+',100%,72%)');
+  ctx.fillStyle=rgb;
  }else ctx.fillStyle='#fff2d4';
  ctx.fillText(label,cx,cy);
  ctx.restore();
