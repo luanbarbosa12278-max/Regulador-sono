@@ -115,8 +115,7 @@ button:hover{filter:brightness(1.1)}
 #historyPanel[hidden]{display:none!important}#historyPanel{background:#192e4b;border:2px solid #ffd166;padding:10px;max-height:45dvh;overflow:auto}#historyList{font-size:8px;line-height:2;color:#fff2d4}.historyItem{border-bottom:1px solid #7893aa;padding:9px 2px}#gameDock #gameMenu #clearHistory{font-size:7px;margin-top:8px}
 /* PEDAL RUSH FINAL ARCADE POLISH — faithful pixels, responsive stage, clear interaction */
 html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
-#game{width:100vw;height:100dvh;object-fit:cover;object-position:25% center;image-rendering:pixelated}
-@media(min-aspect-ratio:13/9){#game{object-position:center center}}
+#game{display:block;width:100vw;height:100dvh;object-fit:contain;object-position:center center;image-rendering:pixelated;background:#0c1525}
 #hud{top:max(10px,env(safe-area-inset-top));left:12px;right:12px;justify-content:center;gap:7px}
 #hud span{background:#263d60e8;min-height:42px;border:2px solid #14213a;border-top-color:#7897b0;border-bottom:3px solid #ffa464;box-shadow:0 4px 0 #101b31b5;padding:9px 12px;color:#fff2d4;letter-spacing:.15px}
 #hud #coins{border-bottom-color:#ffd166}
