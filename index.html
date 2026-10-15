@@ -145,69 +145,63 @@ function end(){if(!playing)return;sfx('finish');playing=false;el('finish').hidde
 function update(dt){if(!playing)return;const activelyPedaling=mode==='bike'?(!!device&&bikeSpeed>1&&performance.now()-lastBikeDataAt<5000):pressed;let target=mode==='bike'?(activelyPedaling?bikeSpeed:0):(pressed?29:0);speed+=(target-speed)*Math.min(1,dt*3.2);scroll+=speed*dt*13;updateRoadCoins(dt);const targetCadence=speed<0.7?0:Math.min(14,Math.max(2.5,speed*.46));animationCadence+=(targetCadence-animationCadence)*Math.min(1,dt*3.8);if(animationCadence>0.1)pedalPhase=(pedalPhase+animationCadence*dt)%4;const moved=speed*dt/3.6;meters+=moved;if(activelyPedaling)elapsed+=dt;points=Math.floor(meters/10);if(mode==='bike'&&activelyPedaling){const intensityMET=EFFORT_MET[effortLevel];calories+=Math.max(0,intensityMET-1)*3.5*CALORIE_WEIGHT_KG/200*dt/60}if(mode==='bike'){const totalDistanceCoins=Math.floor(meters/100);if(totalDistanceCoins>earnedDistance){progress.coins+=totalDistanceCoins-earnedDistance;earnedDistance=totalDistanceCoins;saveProgress()}if(meters>progress.best){progress.best=meters;saveProgress()}if(!recordAwarded&&meters>=startingBest+100&&meters>=100){recordAwarded=true;progress.coins+=25;sfx('record');saveProgress()}if(!goalAwarded&&elapsed>=600){goalAwarded=true;progress.coins+=50;sfx('goal');saveProgress()}}refreshRewards();el('speed').textContent=speed.toFixed(1)+' KM/H';el('distance').textContent=Math.round(meters)+' M';el('score').textContent='★ '+points}
 // Layered, deterministic pixel-art turbo flames; no allocations or particle state required.
 function drawSpeedAboveCyclist(){
-  ctx.save();
-  ctx.font="15px 'Press Start 2P', monospace";
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
-  const cx=220,cy=194,label=speed.toFixed(1)+' KM/H';
-  const intensity=Math.max(0,Math.min(1,(speed-18)/24));
-  const t=performance.now()/1000;
-  if(intensity>0){
-    const width=ctx.measureText(label).width+12;
-    const left=cx-width/2,base=cy-12;
-    const count=Math.ceil(width/5);
-    // Glowing ember bed behind the text, made from hard pixel blocks.
-    ctx.globalAlpha=.22+intensity*.16;
-    ctx.fillStyle='#ff6a21';
-    ctx.fillRect(Math.round(left),Math.round(base-3),Math.round(width),8);
-    ctx.globalAlpha=1;
-    // Three layers: red silhouette, orange flame tongues, hot yellow-white core.
-    for(let layer=0;layer<3;layer++){
-      const step=layer===0?6:layer===1?8:11;
-      const n=Math.ceil(width/step);
-      for(let i=0;i<n;i++){
-        const x=left+i*step+step/2;
-        const wobble=Math.sin(t*(7+layer*2)+i*1.71+layer)*3;
-        const pulse=.64+.36*(.5+.5*Math.sin(t*(10+layer*3)+i*2.37));
-        const height=(11+intensity*(layer===0?27:layer===1?23:17))*pulse;
-        const top=base-height+wobble;
-        const bw=layer===0?7:layer===1?5:3;
-        ctx.fillStyle=layer===0?'#d93728':layer===1?'#ff862b':'#ffe16a';
-        const bottom=base-(layer===0?0:layer===1?2:4);
-        ctx.fillRect(Math.round(x-bw/2),Math.round(top+height*.25),bw,Math.max(2,Math.round(bottom-top-height*.25)));
-        ctx.fillRect(Math.round(x-bw/2+1),Math.round(top),Math.max(2,bw-2),Math.max(3,Math.round(height*.35)));
-        if(layer===2&&intensity>.6&&i%3===0){
-          ctx.fillStyle='#fff6bf';
-          ctx.fillRect(Math.round(x),Math.round(base-height*.65),2,Math.max(2,Math.round(height*.25)));
-        }
-      }
-    }
-    // Animated rising embers, increasingly frequent and tall at turbo speed.
-    const sparks=Math.floor(4+intensity*18);
-    for(let i=0;i<sparks;i++){
-      const seed=i*23.73;
-      const life=(t*(.75+intensity*.95)+i*.317)%1;
-      const x=left+((i*47.13+Math.sin(t*2+i)*9)%width+width)%width;
-      const y=base-8-life*(24+intensity*43);
-      const alpha=(1-life)*(.5+intensity*.5);
-      ctx.globalAlpha=alpha;
-      ctx.fillStyle=i%4===0?'#fff6c7':i%3===0?'#ff542a':'#ffd45b';
-      const px=intensity>.65&&i%5===0?3:2;
-      ctx.fillRect(Math.round(x),Math.round(y),px,px+(i%4===0?2:0));
-    }
-    ctx.globalAlpha=1;
-    // Occasional speed streaks above the digits at very high speed.
-    if(intensity>.7){
-      ctx.fillStyle='#ffbf55';
-      for(let i=0;i<3;i++){
-        const x=left+((t*58+i*59)%width);
-        ctx.fillRect(Math.round(x),Math.round(base-37-i*6),Math.round(5*intensity),2);
-      }
-    }
-  }
-  // Solid outlined speed always stays in front of the fire.
-  ctx.lineWidth=5;ctx.strokeStyle='#050505';ctx.strokeText(label,cx,cy);
-  ctx.fillStyle=intensity>.75?'#fff0b5':'#fff2d4';ctx.fillText(label,cx,cy);
-  ctx.restore();
+ ctx.save();
+ ctx.font="15px 'Press Start 2P', monospace";
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+ const cx=220,cy=194,label=speed.toFixed(1)+' KM/H';
+ const heat=Math.max(0,Math.min(1,(speed-18)/24)),t=performance.now()/1000;
+ if(heat>0){
+   const w=ctx.measureText(label).width+20,left=cx-w/2;
+   // Organic flame tongues: tapered silhouettes rising from behind the digits.
+   const base=cy+10,n=20;
+   for(let i=0;i<n;i++){
+     const x=left+(i+.5)*w/n;
+     const drift=Math.sin(t*5.8+i*1.43)*4;
+     const sway=Math.sin(t*8.3+i*2.4)*3;
+     const flameH=(19+heat*37)*(.55+.45*(.5+.5*Math.sin(t*9.4+i*1.82)));
+     const tipY=base-flameH+sway;
+     const outerW=7+heat*3;
+     // Each tongue has a broad lower body and a narrow, flickering tip.
+     ctx.fillStyle='#b72d21';
+     ctx.beginPath();ctx.moveTo(x-outerW,base);ctx.lineTo(x-outerW*.8,base-flameH*.42);
+     ctx.quadraticCurveTo(x-outerW*.6+drift,base-flameH*.77,x+drift,tipY);
+     ctx.quadraticCurveTo(x+outerW*.7+drift,base-flameH*.62,x+outerW*.8,base-flameH*.32);
+     ctx.lineTo(x+outerW,base);ctx.closePath();ctx.fill();
+     const innerH=flameH*.79;
+     ctx.fillStyle='#ff7826';
+     ctx.beginPath();ctx.moveTo(x-outerW*.65,base);ctx.quadraticCurveTo(x-outerW*.5,base-innerH*.5,x+drift*.6,base-innerH);
+     ctx.quadraticCurveTo(x+outerW*.48,base-innerH*.48,x+outerW*.65,base);ctx.closePath();ctx.fill();
+     ctx.fillStyle='#ffd44b';
+     ctx.beginPath();ctx.moveTo(x-outerW*.35,base);ctx.quadraticCurveTo(x-outerW*.28,base-innerH*.32,x+drift*.25,base-innerH*.65);
+     ctx.quadraticCurveTo(x+outerW*.28,base-innerH*.25,x+outerW*.35,base);ctx.closePath();ctx.fill();
+     if(heat>.55&&i%3===0){ctx.fillStyle='#fff3a2';ctx.fillRect(Math.round(x-1),Math.round(base-innerH*.32),3,Math.round(innerH*.2))}
+   }
+   // Spark particles rising from the fire.
+   for(let i=0;i<Math.floor(5+heat*15);i++){
+     const life=(t*(.8+heat*.8)+i*.273)%1;
+     const x=left+((i*31.7+Math.sin(t+i)*9)%w+w)%w;
+     const y=base-16-life*(29+heat*46);
+     ctx.globalAlpha=(1-life)*(.4+heat*.6);
+     ctx.fillStyle=i%3===0?'#fff4a5':i%2?'#ffb347':'#ff5b2c';
+     ctx.fillRect(Math.round(x),Math.round(y),i%4===0?3:2,i%4===0?4:2);
+   }
+   ctx.globalAlpha=1;
+ }
+ // Thick dark outline remains readable on top of the flames.
+ ctx.lineWidth=5;ctx.strokeStyle='#070710';ctx.strokeText(label,cx,cy);
+ if(heat>.04){
+   // Animated RGB rainbow sweeps continuously across the characters.
+   const width=ctx.measureText(label).width;
+   const rgb=ctx.createLinearGradient(cx-width/2,0,cx+width/2,0);
+   const shift=(t*.3)%1;
+   for(let i=0;i<=12;i++){
+     const hue=((i/12+shift)%1)*360;
+     rgb.addColorStop(i/12,'hsl('+hue+',100%,70%)');
+   }
+   ctx.fillStyle=rgb;
+ }else ctx.fillStyle='#fff2d4';
+ ctx.fillText(label,cx,cy);
+ ctx.restore();
 }
 function draw(){background();drawRoadCoins();cyclist();drawSpeedAboveCyclist();if(!playing)rect(0,0,960,540,'#07152222')}
 function frame(t){let dt=Math.min(.05,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
