@@ -1,7 +1,7 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#101b31"><title>PEDAL RUSH — Arcade</title><style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 :root{--ink:#091122;--navy:#14223b;--blue:#29476b;--gold:#ffcc45;--light:#fff1b5;--red:#f56545;--cyan:#55e5e8}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ink);color:#fff;font-family:'Press Start 2P',monospace}canvas{display:block;width:100vw;height:100dvh;image-rendering:pixelated;touch-action:none}
+*,:before,:after{font-family:'Press Start 2P',monospace!important}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ink);color:#fff;font-family:'Press Start 2P',monospace}canvas{display:block;width:100vw;height:100dvh;image-rendering:pixelated;touch-action:none}
 body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:12;background:repeating-linear-gradient(0deg,transparent 0 3px,#08102312 3px 4px);opacity:.38}
 #hud{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:7px;align-items:flex-start;justify-content:center;flex-wrap:wrap;pointer-events:none;z-index:3}
 #hud span{display:inline-flex;align-items:center;justify-content:center;min-height:37px;background:#0c183ee9;border:3px solid #071023;outline:2px solid #f7bc47;padding:8px 10px;color:#fff4b9;box-shadow:4px 4px 0 #070d19;font-size:clamp(8px,1.25vw,12px);line-height:1.5;text-shadow:2px 2px #8a451e;white-space:nowrap}
@@ -31,7 +31,7 @@ const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d');let W=9
 function resize(){canvas.width=960;canvas.height=540;ctx.imageSmoothingEnabled=false}resize();
 const el=id=>document.getElementById(id),rand=(a,b)=>a+Math.random()*(b-a);
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
-function text(t,x,y,size=20,color='#fff'){ctx.fillStyle='#172239';ctx.font='bold '+size+'px monospace';ctx.fillText(t,x+2,y+3);ctx.fillStyle=color;ctx.fillText(t,x,y)}
+function text(t,x,y,size=20,color='#fff'){ctx.fillStyle='#172239';ctx.font=size+"px 'Press Start 2P', monospace";ctx.fillText(t,x+2,y+3);ctx.fillStyle=color;ctx.fillText(t,x,y)}
 const sceneImage=new Image();sceneImage.src='Cenario.png';let sceneReady=false;sceneImage.onload=()=>sceneReady=true;function background(){if(sceneReady){const tileWidth=960*sceneImage.naturalWidth/sceneImage.naturalHeight;const offset=((scroll%tileWidth)+tileWidth)%tileWidth;for(let x=-offset;x<960;x+=tileWidth)ctx.drawImage(sceneImage,x,0,tileWidth,540);return;}rect(0,0,W,540,'#319be9');for(let i=0;i<18;i++){let x=((i*141-scroll*.08)%1250+1250)%1250-130,y=38+(i*47)%105;rect(x,y,85,17,'#e6f5ff');rect(x+18,y-12,44,16,'#f8f5dd')}
 rect(0,300,960,140,'#5b9c70');for(let i=0;i<22;i++){let x=((i*74-scroll*.23)%1120+1120)%1120-90,h=80+(i*39)%140;rect(x,330-h,48,h,'#6a92ae');for(let j=0;j<3;j++)for(let k=0;k<6;k++)rect(x+7+j*13,340-h+k*21,5,8,'#f8db92')}
 for(let i=0;i<14;i++){let x=((i*112-scroll*.53)%1220+1220)%1220-115;rect(x,285,104,134,['#f1b05e','#6ab9d4','#e57f68','#98c681'][i%4]);rect(x-5,277,114,12,'#a74e3f');rect(x+15,322,26,32,'#344a63');rect(x+61,315,25,50,'#394b57');rect(x,418,104,5,'#f7d8a5')}
