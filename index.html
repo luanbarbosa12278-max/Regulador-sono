@@ -38,37 +38,37 @@ button.secondary{background:#2b5773;color:#fff4d2;border-top-color:#91e5e8;borde
 @media(max-height:570px){#panel{padding:12px 14px}h1{font-size:clamp(22px,6vh,37px);line-height:1.22;margin:0 0 5px}#panel p{margin:6px auto;font-size:8px}#status{margin:7px auto;padding:7px}#play{margin:6px auto;padding:9px}#connect,#demo{margin:4px auto;padding:7px}#overlay{padding:10px}}
 @media(prefers-reduced-motion:reduce){#play{animation:none}}
 
-/* PEDAL RUSH — vibrant 16-bit candy arcade palette */
-:root{--dark:#17113b;--panel:#342365;--gold:#ffdf55;--cream:#fff8dc;--aqua:#50f5e0;--edge:#120d2d}
-html,body{background:#17113b}
-#hud span{background:#312458f2;border-color:#170f36;box-shadow:inset 0 3px #6c4d9c,0 4px #100a2c;color:#fff5d8;text-shadow:2px 2px #160c39}
-#hud #speed{background:#065f70;color:#b4fff3;border-bottom:4px solid #32f3d4}
-#hud #time{background:#73346b;color:#fff1ac;border-bottom:4px solid #ff8ccf}
-#hud #distance{background:#284e99;color:#e1f7ff;border-bottom:4px solid #67a8ff}
-#hud #score{background:#6040a2;color:#f9e1ff;border-bottom:4px solid #d99bff}
-#hud #coins{background:#785017;color:#ffe97d;border-bottom:4px solid #ffc44b}
-#hud #best{background:#315c43;color:#d6ffb5;border-bottom:4px solid #8df575}
-#hud #calories{background:#8a3a43;color:#ffe3bd;border-bottom:4px solid #ff876f}
-#overlay{background:radial-gradient(ellipse at 50% 38%,#7046a18c,#201146dc 62%,#0b0921ed)}
-#panel{background:repeating-linear-gradient(0deg,#38266b 0 22px,#432c78 22px 44px);border-color:#ffe87a;outline-color:#231044;box-shadow:0 0 0 9px #f28b5c,12px 13px 0 10px #110a2e}
-#panel:before,#panel:after{background:#fff4b1;box-shadow:0 0 0 3px #f28b5c}
-h1{color:#ffe95f;text-shadow:4px 4px #ff7b61,8px 8px #ae3997,11px 11px #170d42}
-#panel>p:first-of-type{color:#7bffe3}
-#status{background:#21194c;border-color:#8d6fe0;box-shadow:inset 0 2px #4c368a;color:#ffe7b2}
-button{background:#ffce53;color:#251441;border-color:#23113c;border-top-color:#fff4bb;border-left-color:#fff4bb;box-shadow:4px 4px #140b2f}
-button.secondary{background:#6753c8;color:#fff9e8;border-top-color:#c9b3ff;border-left-color:#c9b3ff}
-#play{background:#ffdb54;color:#352052}
-#connect{background:#2bbba8;color:#102d3d;border-top-color:#a6ffec;border-left-color:#a6ffec}
-#demo{background:#aa63dd;color:#fff8ff;border-top-color:#edc1ff;border-left-color:#edc1ff}
-#sound{background:#ed76b3;color:#391644;border-top-color:#ffc9e4;border-left-color:#ffc9e4}
-#finish{background:#ff7867;color:#421a36;border-top-color:#ffd0a6;border-left-color:#ffd0a6}
-#effortBox{background:#38266bf2;border-color:#ffb66b;box-shadow:4px 4px #180d37;color:#fff1b2}
-#effort{background:#254a81;color:#c4fff4;border-color:#7ccfff}
-#effort option{background:#30215e}
-#accelerate{background:#8bea62;color:#213d25;border-top-color:#dbffb5;border-left-color:#dbffb5}
-#pause{background:#f08b53;color:#391d36;border-top-color:#ffdeb1;border-left-color:#ffdeb1}
-button:hover{filter:brightness(1.15) saturate(1.12)}
-@media(max-width:700px){#panel{box-shadow:0 0 0 6px #f28b5c,7px 8px 0 7px #110a2e}}
+/* SUNSET ARCADE — warm, cohesive Brazilian golden-hour arcade */
+:root{--dark:#192744;--panel:#344f75;--gold:#ffd166;--cream:#fff2d4;--aqua:#82d9db;--edge:#101d34}
+html,body{background:var(--dark);color:var(--cream)}
+#hud span{background:#263e60ef;border-color:#172844;box-shadow:inset 0 2px #56718e,0 3px #101d34;color:#fff2d4;text-shadow:1px 2px #162640}
+#hud #speed{background:#244e68;color:#c5f6ef;border-bottom:3px solid #78d8db}
+#hud #time{background:#69503f;color:#ffe7a3;border-bottom:3px solid #ffd166}
+#hud #distance{background:#344f75;color:#f2f6ff;border-bottom:3px solid #8baed0}
+#hud #score{background:#465675;color:#fff0c5;border-bottom:3px solid #ffc27b}
+#hud #coins{background:#675138;color:#ffe7a1;border-bottom:3px solid #ffd166}
+#hud #best{background:#355d5d;color:#e5f5d4;border-bottom:3px solid #a3cba3}
+#hud #calories{background:#714d49;color:#ffe5d0;border-bottom:3px solid #ff9a74}
+#overlay{background:radial-gradient(ellipse at 50% 35%,#465d7aa3,#192744dd 66%,#101a30f2)}
+#panel{background:repeating-linear-gradient(0deg,#344f75 0 24px,#3b577d 24px 48px);border-color:#ffe0a2;outline-color:#182943;box-shadow:0 0 0 9px #bf7450,12px 13px 0 10px #101b31}
+#panel:before,#panel:after{background:#fff2d4;box-shadow:0 0 0 3px #b86f4d}
+h1{color:#ffd166;text-shadow:4px 4px #ff8a4c,8px 8px #a95e4e,11px 11px #192744}
+p{color:#f2e8d7}#panel>p:first-of-type{color:#b8e7e2}
+#status{background:#223955;border-color:#7893aa;box-shadow:inset 0 2px #365576;color:#ffe3a7}
+button{background:#ff8a4c;color:#192744;border-color:#1a2a45;border-top-color:#ffd5a4;border-left-color:#ffd5a4;box-shadow:4px 4px #101b31}
+button.secondary{background:#466788;color:#fff2d4;border-top-color:#93b3c4;border-left-color:#93b3c4}
+#play{background:#ff8a4c;color:#192744}
+#connect{background:#6fbcb6;color:#172c43;border-top-color:#c2f3e6;border-left-color:#c2f3e6}
+#demo{background:#58779a;color:#fff2d4;border-top-color:#a8c2d4;border-left-color:#a8c2d4}
+#sound{background:#496783;color:#fff2d4;border-top-color:#a3bdcc;border-left-color:#a3bdcc}
+#finish{background:#d47b60;color:#192744;border-top-color:#ffcab0;border-left-color:#ffcab0}
+#effortBox{background:#344f75f2;border-color:#ffd166;box-shadow:4px 4px #15243c;color:#fff2d4}
+#effort{background:#223f60;color:#fff2d4;border-color:#a6b8bf}
+#effort option{background:#344f75}
+#accelerate{background:#ffd166;color:#24344b;border-top-color:#fff0b7;border-left-color:#fff0b7}
+#pause{background:#58779a;color:#fff2d4;border-top-color:#a8c2d4;border-left-color:#a8c2d4}
+button:hover{filter:brightness(1.1)}
+@media(max-width:700px){#panel{box-shadow:0 0 0 6px #bf7450,7px 8px 0 7px #101b31}}
 </style></head><body>
 <canvas id="game"></canvas><div id="hud"><span id="speed">0.0 KM/H</span><span id="distance">0 M</span><span id="score">★ 0</span><span id="coins">🪙 0</span><span id="best">🏆 0 M</span><span id="time">⏱ 0:00</span><span id="calories" title="Estimativa de calorias, não medição">🔥 ~0 KCAL</span></div><div id="overlay"><div id="panel"><h1>PEDAL<br>RUSH</h1><p>ARCADE CYCLING • BRASIL</p><p id="status">KWIKWI — DESCONECTADA</p><button id="play">▶ JOGAR</button><button id="connect" class="secondary">ᛒ CONECTAR BICICLETA</button><button id="demo" class="secondary">⌨ MODO TESTE</button><p style="font-size:12px">No modo teste, segure ESPAÇO ou ACELERAR. No modo bicicleta, basta pedalar para avançar.</p></div></div><button id="sound" class="secondary" aria-label="Alternar efeitos sonoros" aria-pressed="true">♪ SOM ON</button><button id="finish" class="secondary" hidden>✓ FINALIZAR TREINO</button><label id="effortBox" for="effort">⚙ ESFORÇO <select id="effort" aria-label="Esforço percebido"><option value="0">MUITO LEVE</option><option value="1">LEVE</option><option value="2" selected>MÉDIO</option><option value="3">PESADO</option><option value="4">MUITO PESADO</option></select></label><div id="controls"><button id="accelerate">▲ ACELERAR</button><button id="pause">Ⅱ PAUSA</button></div><div id="hint">FTMS 0x1826 • Indoor Bike Data 0x2AD2</div>
 <script>
