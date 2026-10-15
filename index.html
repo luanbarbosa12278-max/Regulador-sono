@@ -112,8 +112,65 @@ button:hover{filter:brightness(1.1)}
 
 /* Speed is rendered directly above the cyclist on the scaled game canvas. */
 #hud #speed{display:none!important}
-#historyPanel[hidden]{display:none!important}#historyPanel{background:#192e4b;border:2px solid #ffd166;padding:10px;max-height:45dvh;overflow:auto}#historyList{font-size:8px;line-height:2;color:#fff2d4}.historyItem{border-bottom:1px solid #7893aa;padding:9px 2px}#gameDock #gameMenu #clearHistory{font-size:7px;margin-top:8px}</style></head><body>
-<canvas id="game"></canvas><div id="hud"><span id="speed">0.0 KM/H</span><span id="distance">0 M</span><span id="score">★ 0</span><span id="coins">🪙 0</span><span id="best">🏆 0 M</span><span id="time">⏱ 0:00</span><span id="calories" title="Estimativa de calorias, não medição">🔥 ~0 KCAL</span></div><div id="overlay"><div id="panel"><h1>PEDAL<br>RUSH</h1><p>ARCADE CYCLING • BRASIL</p><p id="status">KWIKWI — DESCONECTADA</p><button id="play">▶ JOGAR</button><button id="connect" class="secondary">ᛒ CONECTAR BICICLETA</button><button id="demo" class="secondary">⌨ MODO TESTE</button><p style="font-size:12px">No modo teste, segure ESPAÇO ou →. No modo bicicleta, basta pedalar para avançar.</p></div></div><div id="gameDock"><button id="menuToggle" class="secondary" aria-controls="gameMenu" aria-expanded="false">☰ MENU</button><div id="gameMenu" hidden><div class="menuTitle">⚙ MENU DO JOGO</div><label id="effortBox" for="effort">ESFORÇO <select id="effort" aria-label="Esforço percebido"><option value="0">MUITO LEVE</option><option value="1">LEVE</option><option value="2" selected>MÉDIO</option><option value="3">PESADO</option><option value="4">MUITO PESADO</option></select></label><button id="sound" class="secondary" aria-label="Alternar efeitos sonoros" aria-pressed="true">♪ SOM ON</button><button id="finish" class="secondary" hidden>✓ FINALIZAR TREINO</button><button id="historyToggle" class="secondary">📋 HISTÓRICO</button><div id="historyPanel" hidden><div id="historyList"></div><button id="clearHistory" class="secondary">LIMPAR HISTÓRICO</button></div><button id="menuClose" class="secondary">✕ FECHAR</button></div><div id="controls"><button id="pause">Ⅱ PAUSA</button></div></div><div id="hint">FTMS 0x1826 • Indoor Bike Data 0x2AD2</div>
+#historyPanel[hidden]{display:none!important}#historyPanel{background:#192e4b;border:2px solid #ffd166;padding:10px;max-height:45dvh;overflow:auto}#historyList{font-size:8px;line-height:2;color:#fff2d4}.historyItem{border-bottom:1px solid #7893aa;padding:9px 2px}#gameDock #gameMenu #clearHistory{font-size:7px;margin-top:8px}
+/* PEDAL RUSH FINAL ARCADE POLISH — faithful pixels, responsive stage, clear interaction */
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+#game{width:100vw;height:100dvh;object-fit:cover;object-position:25% center;image-rendering:pixelated}
+@media(min-aspect-ratio:13/9){#game{object-position:center center}}
+#hud{top:max(10px,env(safe-area-inset-top));left:12px;right:12px;justify-content:center;gap:7px}
+#hud span{background:#263d60e8;min-height:42px;border:2px solid #14213a;border-top-color:#7897b0;border-bottom:3px solid #ffa464;box-shadow:0 4px 0 #101b31b5;padding:9px 12px;color:#fff2d4;letter-spacing:.15px}
+#hud #coins{border-bottom-color:#ffd166}
+#hud #best{border-bottom-color:#9cd7ac}
+#hud #time{border-bottom-color:#dba977}
+#hud #calories{border-bottom-color:#ff8a4c}
+#rideStatus{position:absolute;top:82px;left:14px;z-index:3;pointer-events:none;background:#172b49e0;border:2px solid #718ba3;color:#e9e4d0;padding:8px 10px;font-size:8px;letter-spacing:.3px;box-shadow:3px 3px 0 #112139}
+#rideStatus.bike{color:#b6f2c8;border-color:#7ed69d}
+#turboIndicator{position:absolute;top:83px;right:14px;z-index:3;padding:9px 13px;background:#462d31ed;border:3px solid #ffae57;color:#ffe49c;text-shadow:2px 2px #4b1d23;font-size:11px;line-height:1.5;text-align:center;pointer-events:none;box-shadow:4px 4px #16223d;animation:turboPace 1.3s steps(2,end) infinite}
+#turboIndicator small{display:block;font-size:7px;color:#fff2d4}
+#turboIndicator[hidden],#gameToast[hidden],#resume[hidden],#finishPaused[hidden],#sessionSummary[hidden],#homeHistory[hidden],#menuShade[hidden],#gameDock[hidden]{display:none!important}
+@keyframes turboPace{50%{filter:brightness(1.2);transform:translateY(-2px)}}
+#overlay{z-index:15;align-items:center;padding:calc(15px + env(safe-area-inset-top)) 14px calc(15px + env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% 32%,#345777d6,#15263de9 66%,#0c1525f6)}
+#panel{width:min(100%,540px);max-height:min(92dvh,820px);overflow-y:auto;border:4px solid #ffdf98;outline:4px solid #152943;box-shadow:0 0 0 8px #c77954,9px 10px 0 8px #0f1b32;padding:23px 21px 20px}
+#panel h1{font-size:clamp(26px,5.1vw,48px);line-height:1.28;letter-spacing:1px}
+#panel button{max-width:100%;transition:transform .14s steps(2,end),filter .15s ease,box-shadow .14s}
+#panel #homeHistoryToggle{display:block;width:min(92%,355px);margin:11px auto;background:#405f80;color:#fff2d4;font-size:8px}
+#panel #resume{display:block;width:min(92%,355px);margin:9px auto;background:#7ecea5;color:#18374a;border-top-color:#d5ffcf;border-left-color:#d5ffcf;font-size:10px}
+#panel #finishPaused{display:block;width:min(92%,355px);margin:9px auto;background:#d47b60;color:#192744}
+#panel #homeHistory{margin:10px auto;padding:12px;background:#1b314f;border:2px solid #7898af;max-height:210px;overflow-y:auto;text-align:left}
+#homeHistoryList{font-size:8px;line-height:1.9}
+#sessionSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px auto;padding:10px;background:#192f4d;border:2px solid #7899b1}
+#sessionSummary .stat{background:#334f71;border-left:3px solid #ffd166;padding:10px 5px;font-size:8px;line-height:1.9;color:#fff2d4}
+#sessionSummary .stat strong{display:block;font-size:9px;color:#ffdd8f}
+#gameDock #menuShade{position:fixed;inset:0;background:#081426a1;z-index:9;pointer-events:auto;cursor:pointer}
+#gameDock #gameMenu{width:min(370px,90vw);padding:max(22px,env(safe-area-inset-top)) 16px max(22px,env(safe-area-inset-bottom));border-left:4px solid #ffd166;box-shadow:-6px 0 0 #152640,-12px 0 28px #071324aa;scrollbar-color:#ffb66e #243b5d}
+#gameDock #gameMenu .menuTitle{letter-spacing:.5px}
+#gameDock #gameMenu button{min-height:47px;transition:filter .15s ease}
+#gameDock #menuToggle{box-shadow:4px 4px 0 #15243b}
+#gameDock #controls #pause{min-width:110px}
+#gameToast{position:absolute;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:14;max-width:min(88vw,480px);width:max-content;padding:12px 15px;background:#293b61f4;border:3px solid #ffd166;box-shadow:5px 5px 0 #14233c;color:#fff2d4;font-size:9px;line-height:1.8;text-align:center;pointer-events:none;animation:toastIn .22s ease-out}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+.historyItem{font-size:8px;line-height:1.85;padding:10px 3px;border-bottom:1px solid #6b8ca3;color:#f2e9d8}
+.historyItem strong{display:block;color:#ffda8f;font-size:8px;margin-bottom:5px}
+.historyTotals{color:#a9e8d7;font-size:8px;line-height:1.8;padding:7px 0 12px}
+@media(max-width:700px){
+ #hud{top:max(6px,env(safe-area-inset-top));left:6px;right:6px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ #hud span{font-size:clamp(6px,1.5vw,8px);min-height:30px;padding:6px 3px;text-align:center;letter-spacing:0;white-space:nowrap;box-shadow:0 2px 0 #101b31;border-width:2px;border-bottom-width:3px}
+ #rideStatus{top:calc(78px + env(safe-area-inset-top));left:7px;font-size:6px;padding:6px 7px}
+ #turboIndicator{top:calc(77px + env(safe-area-inset-top));right:7px;font-size:8px;padding:6px 8px;border-width:2px}
+ #turboIndicator small{font-size:6px}
+ #panel{width:min(100%,470px);padding:18px 12px 15px}
+ #panel h1{font-size:clamp(24px,7vw,40px)}
+ #panel button{font-size:8px;padding:10px}
+ #panel p{font-size:8px}
+ #sessionSummary{padding:6px;gap:5px}
+ #sessionSummary .stat{font-size:7px;padding:6px 3px}
+ #sessionSummary .stat strong{font-size:8px}
+ #gameToast{bottom:70px;font-size:7px;padding:9px 11px}
+}
+@media(max-width:370px){#rideStatus{font-size:5px}#hud span{font-size:6px}}
+@media(prefers-reduced-motion:reduce){#turboIndicator,#gameToast{animation:none}}
+</style></head><body>
+<canvas id="game" role="img" aria-label="Ciclista pedalando pelo cenário do PEDAL RUSH"></canvas><div id="hud"><span id="speed">0.0 KM/H</span><span id="distance">0 M</span><span id="score">★ 0</span><span id="coins">🪙 0</span><span id="best">🏆 0 M</span><span id="time">⏱ 0:00</span><span id="calories" title="Estimativa de calorias, não medição">🔥 ~0 KCAL</span></div><div id="rideStatus" aria-live="polite">◉ PRONTO PARA PEDALAR</div><div id="turboIndicator" hidden>🔥 TURBO ATIVO <small>MAIS MOEDAS!</small></div><div id="overlay"><div id="panel"><h1>PEDAL<br>RUSH</h1><p>ARCADE CYCLING • BRASIL</p><p id="status" role="status">KWIKWI — DESCONECTADA</p><div id="sessionSummary" hidden></div><button id="resume" class="secondary" hidden>▶ CONTINUAR TREINO</button><button id="finishPaused" class="secondary" hidden>✓ FINALIZAR E SALVAR</button><button id="play">▶ JOGAR</button><button id="connect" class="secondary">ᛒ CONECTAR BICICLETA</button><button id="demo" class="secondary">⌨ MODO TESTE</button><button id="homeHistoryToggle" class="secondary" aria-expanded="false">📋 MEUS TREINOS</button><div id="homeHistory" hidden><div id="homeHistoryList"></div></div><p style="font-size:12px">No modo teste, segure ESPAÇO ou →. No modo bicicleta, basta pedalar para avançar.</p></div></div><div id="gameDock" hidden><div id="menuShade" hidden></div><button id="menuToggle" class="secondary" aria-controls="gameMenu" aria-expanded="false">☰ MENU</button><div id="gameMenu" hidden><div class="menuTitle">⚙ MENU DO JOGO</div><label id="effortBox" for="effort">ESFORÇO <select id="effort" aria-label="Esforço percebido"><option value="0">MUITO LEVE</option><option value="1">LEVE</option><option value="2" selected>MÉDIO</option><option value="3">PESADO</option><option value="4">MUITO PESADO</option></select></label><button id="sound" class="secondary" aria-label="Alternar efeitos sonoros" aria-pressed="true">♪ SOM ON</button><button id="finish" class="secondary" hidden>✓ FINALIZAR TREINO</button><button id="historyToggle" class="secondary">📋 HISTÓRICO</button><div id="historyPanel" hidden><div id="historyList"></div><button id="clearHistory" class="secondary">LIMPAR HISTÓRICO</button></div><button id="menuClose" class="secondary">✕ FECHAR</button></div><div id="controls"><button id="pause">Ⅱ PAUSA</button></div></div><div id="hint">FTMS 0x1826 • Indoor Bike Data 0x2AD2</div><div id="gameToast" role="status" aria-live="polite" hidden></div>
 <script>
 const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d');let W=960,H=540,playing=false,mode='demo',bikeSpeed=0,speed=0,meters=0,points=0,scroll=0,pressed=false,device=null,characteristic=null,last=performance.now();
 function resize(){canvas.width=960;canvas.height=540;ctx.imageSmoothingEnabled=false}resize();
