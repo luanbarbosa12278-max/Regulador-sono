@@ -143,7 +143,29 @@ function cyclist(){const index=Math.floor(pedalPhase)%4;const img=cyclistFrames[
 function reset(){unlockAudio();sfx('start');playing=true;speed=0;meters=0;points=0;scroll=0;pedalPhase=0;animationCadence=0;elapsed=0;calories=0;earnedDistance=0;recordAwarded=false;goalAwarded=false;startingBest=progress.best;sessionBest=0;roadCoins=[];nextCoinAt=360;coinEffects=[];coinClock=0;el('finish').hidden=false;el('overlay').style.display='none';setGameMenu(false);refreshRewards()}
 function end(){if(!playing)return;sfx('finish');playing=false;el('finish').hidden=true;el('overlay').style.display='grid';el('status').textContent='TREINO FINALIZADO • '+Math.round(meters)+' m • '+Math.floor(elapsed/60)+' min • ~'+Math.round(calories)+' kcal estimadas • '+(mode='bike'?'🪙 '+progress.coins+' moedas totais':'MODO TESTE (SEM RECOMPENSAS)');el('play').textContent='↻ NOVO TREINO';saveProgress()}
 function update(dt){if(!playing)return;const activelyPedaling=mode==='bike'?(!!device&&bikeSpeed>1&&performance.now()-lastBikeDataAt<5000):pressed;let target=mode==='bike'?(activelyPedaling?bikeSpeed:0):(pressed?29:0);speed+=(target-speed)*Math.min(1,dt*3.2);scroll+=speed*dt*13;updateRoadCoins(dt);const targetCadence=speed<0.7?0:Math.min(14,Math.max(2.5,speed*.46));animationCadence+=(targetCadence-animationCadence)*Math.min(1,dt*3.8);if(animationCadence>0.1)pedalPhase=(pedalPhase+animationCadence*dt)%4;const moved=speed*dt/3.6;meters+=moved;if(activelyPedaling)elapsed+=dt;points=Math.floor(meters/10);if(mode==='bike'&&activelyPedaling){const intensityMET=EFFORT_MET[effortLevel];calories+=Math.max(0,intensityMET-1)*3.5*CALORIE_WEIGHT_KG/200*dt/60}if(mode==='bike'){const totalDistanceCoins=Math.floor(meters/100);if(totalDistanceCoins>earnedDistance){progress.coins+=totalDistanceCoins-earnedDistance;earnedDistance=totalDistanceCoins;saveProgress()}if(meters>progress.best){progress.best=meters;saveProgress()}if(!recordAwarded&&meters>=startingBest+100&&meters>=100){recordAwarded=true;progress.coins+=25;sfx('record');saveProgress()}if(!goalAwarded&&elapsed>=600){goalAwarded=true;progress.coins+=50;sfx('goal');saveProgress()}}refreshRewards();el('speed').textContent=speed.toFixed(1)+' KM/H';el('distance').textContent=Math.round(meters)+' M';el('score').textContent='★ '+points}
-function drawSpeedAboveCyclist(){ctx.save();ctx.font="15px 'Press Start 2P', monospace";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=5;ctx.strokeStyle='#050505';const label=speed.toFixed(1)+' KM/H';ctx.strokeText(label,220,194);ctx.fillStyle='#fff2d4';ctx.fillText(label,220,194);ctx.restore()}
+function drawSpeedAboveCyclist(){
+ctx.save();ctx.font="15px 'Press Start 2P', monospace";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+const label=speed.toFixed(1)+' KM/H',cx=220,cy=194,hot=Math.max(0,Math.min(1,(speed-18)/22));
+if(hot>0){
+const t=performance.now()/1000;
+const textWidth=ctx.measureText(label).width;
+const count=Math.floor(8+hot*15);
+for(let i=0;i<count;i++){
+const x=cx-textWidth/2+(i+.5)*textWidth/count;
+const wave=Math.sin(t*11+i*2.13);
+const flicker=Math.sin(t*17+i*5.4);
+const flameH=(9+hot*19)*(0.7+0.3*(wave+1)/2);
+const baseY=cy-12;
+const topY=baseY-flameH-(flicker*3);
+const width=3+hot*3;
+ctx.fillStyle='#ff5a24';ctx.fillRect(Math.round(x-width),Math.round(topY+5),Math.ceil(width*2),Math.ceil(baseY-topY-5));
+ctx.fillStyle='#ff9c27';ctx.fillRect(Math.round(x-width*.7),Math.round(topY+3),Math.ceil(width*1.4),Math.ceil(baseY-topY-8));
+ctx.fillStyle='#ffe369';ctx.fillRect(Math.round(x-1.5),Math.round(topY+flameH*.42),3,Math.max(2,Math.round(flameH*.34)));
+if(hot>.45&&i%3===0){ctx.fillStyle='#ffcf55';ctx.fillRect(Math.round(x+wave*5),Math.round(topY-6-(t*15+i*7)%12),3,3)}
+}
+}
+ctx.lineWidth=5;ctx.strokeStyle='#050505';ctx.strokeText(label,cx,cy);ctx.fillStyle=hot>.65?'#ffe28b':'#fff2d4';ctx.fillText(label,cx,cy);ctx.restore()
+}
 function draw(){background();drawRoadCoins();cyclist();drawSpeedAboveCyclist();if(!playing)rect(0,0,960,540,'#07152222')}
 function frame(t){let dt=Math.min(.05,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 el('play').onclick=()=>{mode=device?'bike':'demo';reset()};el('demo').onclick=()=>{mode='demo';reset()};el('pause').onclick=()=>{if(playing){sfx('pause');playing=false;el('finish').hidden=true;el('overlay').style.display='grid';el('status').textContent='PAUSADO • clique JOGAR para iniciar novo treino'}};el('finish').onclick=()=>{setGameMenu(false);end()};window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowRight'){pressed=true;e.preventDefault()}});window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowRight')pressed=false});
