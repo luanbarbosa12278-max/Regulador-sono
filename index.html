@@ -197,7 +197,7 @@ return;}rect(0,0,W,540,'#319be9');for(let i=0;i<18;i++){let x=((i*141-scroll*.08
 rect(0,300,960,140,'#5b9c70');for(let i=0;i<22;i++){let x=((i*74-scroll*.23)%1120+1120)%1120-90,h=80+(i*39)%140;rect(x,330-h,48,h,'#6a92ae');for(let j=0;j<3;j++)for(let k=0;k<6;k++)rect(x+7+j*13,340-h+k*21,5,8,'#f8db92')}
 for(let i=0;i<14;i++){let x=((i*112-scroll*.53)%1220+1220)%1220-115;rect(x,285,104,134,['#f1b05e','#6ab9d4','#e57f68','#98c681'][i%4]);rect(x-5,277,114,12,'#a74e3f');rect(x+15,322,26,32,'#344a63');rect(x+61,315,25,50,'#394b57');rect(x,418,104,5,'#f7d8a5')}
 rect(0,422,960,18,'#b9b6ac');for(let i=0;i<40;i++)rect(i*27,422,2,16,'#656b73');rect(0,440,960,100,'#414857');rect(0,445,960,3,'#687081');for(let i=0;i<12;i++){let x=((i*116-scroll*1.2)%1200+1200)%1200-110;rect(x,492,61,5,'#f7eac2')}}
-const cyclistFrames=Array.from({length:4},(_,i)=>{const img=new Image();img.src='CiclistaNovo'+(i+1)+'.png';return img});let pedalPhase=0;let animationCadence=0;const STORAGE_KEY='pedal-rush-progress-v1';let progress={coins:0,best:0};try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');progress.coins=Math.max(0,Math.floor(Number(saved.coins)||0));progress.best=Math.max(0,Number(saved.best)||0)}catch(e){}let calories=0;const CALORIE_WEIGHT_KG=70;const EFFORT_MET=[3,4,5.5,7,8.5];let effortLevel=2,lastBikeDataAt=0;try{const saved=Number(localStorage.getItem('pedal-rush-effort'));if(Number.isInteger(saved)&&saved>=0&&saved<=4)effortLevel=saved}catch(e){}el('effort').value=String(effortLevel);el('effort').onchange=()=>{effortLevel=Number(el('effort').value);try{localStorage.setItem('pedal-rush-effort',String(effortLevel))}catch(e){}sfx('click')};let maxWorkoutSpeed=0;let elapsed=0,earnedDistance=0,recordAwarded=false,goalAwarded=false,sessionBest=0,startingBest=0;function saveProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(progress))}catch(e){}}function refreshRewards(){el('coins').textContent='🪙 '+progress.coins;el('best').textContent='🏆 '+Math.round(progress.best)+' M';el('time').textContent='⏱ '+Math.floor(elapsed/60)+':'+String(Math.floor(elapsed%60)).padStart(2,'0');el('calories').textContent='🔥 ~'+Math.round(calories)+' KCAL'}refreshRewards();
+const cyclistFrames=Array.from({length:4},(_,i)=>{const img=new Image();img.src='CiclistaNovo'+(i+1)+'.png';return img});let pedalPhase=0;let animationCadence=0;const STORAGE_KEY='pedal-rush-progress-v1';let progress={coins:0,best:0};try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');progress.coins=Math.max(0,Math.floor(Number(saved.coins)||0));progress.best=Math.max(0,Number(saved.best)||0)}catch(e){}let calories=0;const CALORIE_WEIGHT_KG=70;const EFFORT_MET=[3,4,5.5,7,8.5];let effortLevel=2,lastBikeDataAt=0;try{const saved=Number(localStorage.getItem('pedal-rush-effort'));if(Number.isInteger(saved)&&saved>=0&&saved<=4)effortLevel=saved}catch(e){}el('effort').value=String(effortLevel);el('effort').onchange=()=>{effortLevel=Number(el('effort').value);try{localStorage.setItem('pedal-rush-effort',String(effortLevel))}catch(e){}sfx('click')};let maxWorkoutSpeed=0,paused=false,startingCoins=0,turboOn=false;let elapsed=0,earnedDistance=0,recordAwarded=false,goalAwarded=false,sessionBest=0,startingBest=0;function saveProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(progress))}catch(e){}}function refreshRewards(){el('coins').textContent='🪙 '+progress.coins;el('best').textContent='🏆 '+Math.round(progress.best)+' M';el('time').textContent='⏱ '+Math.floor(elapsed/60)+':'+String(Math.floor(elapsed%60)).padStart(2,'0');el('calories').textContent='🔥 ~'+Math.round(calories)+' KCAL'}refreshRewards();
 let roadCoins=[],nextCoinAt=360,coinEffects=[],coinClock=0;
 const coinFrames=Array.from({length:4},(_,i)=>{const img=new Image();img.src='Moeda'+(i+1)+'.png';return img});
 function spawnRoadCoins(){while(nextCoinAt<scroll+1250){roadCoins.push({x:nextCoinAt,seed:Math.random()*6.28,taken:false});const turbo=speed>=18;nextCoinAt+=(turbo?95:240)+Math.random()*(turbo?65:170)}}
@@ -205,8 +205,71 @@ function burstCoin(x,y){const particles=[];for(let i=0;i<12;i++){const a=i*Math.
 function updateRoadCoins(dt){coinClock+=dt;spawnRoadCoins();for(const coin of roadCoins){const x=coin.x-scroll;if(!coin.taken&&x<230&&x>185&&speed>.7){coin.taken=true;burstCoin(x,400);sfx('coin');if(mode==='bike'){progress.coins++;saveProgress()}}}roadCoins=roadCoins.filter(c=>!c.taken&&c.x-scroll>-70);for(const effect of coinEffects){effect.life-=dt;for(const p of effect.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt;p.life-=dt}}coinEffects=coinEffects.filter(e=>e.life>0)}
 function drawRoadCoins(){const frame=Math.floor(coinClock*9)%4;for(const coin of roadCoins){const x=Math.round(coin.x-scroll);if(x<-45||x>1005)continue;const y=Math.round(400+Math.sin(coinClock*5+coin.seed)*5);const twinkle=Math.sin(coinClock*7+coin.seed);ctx.fillStyle='#432a1855';ctx.fillRect(x-18,433,36,4);ctx.fillStyle='#f7a82c';ctx.fillRect(x-24,y-1,5,3);ctx.fillRect(x+20,y+2,4,3);ctx.fillStyle='#fff4a6';if(twinkle>.2){ctx.fillRect(x-26,y-12,3,10);ctx.fillRect(x-30,y-8,11,3);ctx.fillRect(x+22,y+13,3,7);ctx.fillRect(x+20,y+15,7,3)}const img=coinFrames[frame];const pulse=1+Math.sin(coinClock*8+coin.seed)*.045;const size=Math.round(45*pulse);if(img.complete&&img.naturalWidth>0){ctx.drawImage(img,x-Math.floor(size/2),y-Math.floor(size/2),size,size)}else{ctx.fillStyle='#6c3c16';ctx.fillRect(x-19,y-20,38,40);ctx.fillStyle='#ffcc40';ctx.fillRect(x-16,y-17,32,34);ctx.fillStyle='#fff2a4';ctx.fillRect(x-4,y-11,8,22)}}for(const e of coinEffects){for(const p of e.particles){if(p.life<=0)continue;ctx.fillStyle=p.life>.3?'#ffe777':'#ef9336';ctx.fillRect(Math.round(p.x),Math.round(p.y),p.size,p.size)}const rise=(.85-e.life)*58;const alpha=Math.max(0,Math.min(1,e.life/.4));ctx.save();ctx.globalAlpha=alpha;text('+1',Math.round(e.x+15),Math.round(e.y-38-rise),17,'#ffe873');ctx.restore()}}
 function cyclist(){const index=Math.floor(pedalPhase)%4;const img=cyclistFrames[index];if(img.complete&&img.naturalWidth>0){const h=245,w=h*img.naturalWidth/img.naturalHeight;ctx.drawImage(img,220-w/2,465-h,w,h)}else{rect(170,330,70,120,'#e54b46')}}
-function reset(){unlockAudio();sfx('start');playing=true;speed=0;meters=0;points=0;scroll=0;pedalPhase=0;animationCadence=0;elapsed=0;calories=0;earnedDistance=0;recordAwarded=false;goalAwarded=false;startingBest=progress.best;sessionBest=0;maxWorkoutSpeed=0;roadCoins=[];nextCoinAt=360;coinEffects=[];coinClock=0;el('finish').hidden=false;el('overlay').style.display='none';setGameMenu(false);refreshRewards()}
-function end(){if(!playing)return;sfx('finish');recordWorkout();playing=false;el('finish').hidden=true;el('overlay').style.display='grid';el('status').textContent='TREINO FINALIZADO • '+Math.round(meters)+' m • '+Math.floor(elapsed/60)+' min • ~'+Math.round(calories)+' kcal estimadas • '+(mode==='bike'?'🪙 '+progress.coins+' moedas totais':'MODO TESTE (SEM RECOMPENSAS)');el('play').textContent='↻ NOVO TREINO';saveProgress()}
+
+function showSessionSummary(){
+ const summary=el('sessionSummary');summary.replaceChildren();
+ const stats=[
+  ['DISTÂNCIA',(meters/1000).toFixed(2)+' KM'],
+  ['PEDALANDO',Math.floor(elapsed/60)+'M '+Math.floor(elapsed%60)+'S'],
+  ['CALORIAS','~'+Math.round(calories)+' KCAL'],
+  ['VEL. MÁX',maxWorkoutSpeed.toFixed(1)+' KM/H'],
+  ['MOEDAS',mode==='bike'?'+'+Math.max(0,progress.coins-startingCoins):'MODO TESTE'],
+  ['PONTOS',String(points)]
+ ];
+ for(const [name,value] of stats){
+  const card=document.createElement('div');card.className='stat';
+  const title=document.createElement('strong');title.textContent=value;
+  card.append(title,document.createTextNode(name));summary.appendChild(card);
+ }
+}
+function syncRideStatus(){
+ const status=el('rideStatus'),connected=!!device;
+ status.classList.toggle('bike',mode==='bike'&&connected);
+ status.textContent=mode==='bike'?(connected?'● KWIKWI CONECTADA':'○ KWIKWI DESCONECTADA'):(playing||paused?'⌨ MODO TESTE':'◉ PRONTO PARA PEDALAR');
+}
+let toastTimer=0;
+function showGameToast(message){
+ const toast=el('gameToast');toast.textContent=message;toast.hidden=false;
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.hidden=true},2300);
+}
+function reset(){
+ unlockAudio();sfx('start');playing=true;paused=false;pressed=false;
+ speed=0;meters=0;points=0;scroll=0;pedalPhase=0;animationCadence=0;elapsed=0;calories=0;
+ earnedDistance=0;recordAwarded=false;goalAwarded=false;startingBest=progress.best;
+ sessionBest=0;maxWorkoutSpeed=0;startingCoins=progress.coins;turboOn=false;
+ roadCoins=[];nextCoinAt=360;coinEffects=[];coinClock=0;last=performance.now();
+ el('finish').hidden=false;el('resume').hidden=true;el('finishPaused').hidden=true;
+ el('sessionSummary').hidden=true;el('turboIndicator').hidden=true;el('homeHistory').hidden=true;
+ el('homeHistoryToggle').setAttribute('aria-expanded','false');
+ el('play').textContent='▶ JOGAR';el('overlay').style.display='none';el('gameDock').hidden=false;
+ setGameMenu(false);refreshRewards();syncRideStatus();
+}
+function pauseWorkout(reason='PAUSADO • seu treino está guardado'){
+ if(!playing)return;
+ sfx('pause');playing=false;paused=true;pressed=false;turboOn=false;
+ el('turboIndicator').hidden=true;
+ setGameMenu(false);el('finish').hidden=true;el('gameDock').hidden=true;
+ el('overlay').style.display='grid';el('resume').hidden=false;
+ el('finishPaused').hidden=false;el('sessionSummary').hidden=false;
+ el('play').textContent='↻ RECOMEÇAR';el('status').textContent=reason;
+ showSessionSummary();syncRideStatus();
+}
+function resumeWorkout(){
+ if(!paused)return;
+ unlockAudio();sfx('start');paused=false;playing=true;last=performance.now();
+ el('overlay').style.display='none';el('gameDock').hidden=false;
+ el('finish').hidden=false;el('resume').hidden=true;el('finishPaused').hidden=true;
+ el('sessionSummary').hidden=true;syncRideStatus();
+}
+function end(){
+ if(!playing&&!paused)return;
+ sfx('finish');recordWorkout();playing=false;paused=false;pressed=false;turboOn=false;
+ el('turboIndicator').hidden=true;setGameMenu(false);
+ el('finish').hidden=true;el('gameDock').hidden=true;el('overlay').style.display='grid';
+ el('resume').hidden=true;el('finishPaused').hidden=true;el('sessionSummary').hidden=false;
+ el('status').textContent=mode==='bike'?'TREINO SALVO! BOM PEDAL 🚴':'MODO TESTE FINALIZADO • SEM RECOMPENSAS';
+ el('play').textContent='↻ NOVO TREINO';showSessionSummary();saveProgress();syncRideStatus();
+}
 function update(dt){if(!playing)return;const activelyPedaling=mode==='bike'?(!!device&&bikeSpeed>1&&performance.now()-lastBikeDataAt<5000):pressed;let target=mode==='bike'?(activelyPedaling?bikeSpeed:0):(pressed?29:0);speed+=(target-speed)*Math.min(1,dt*3.2);if(mode==='bike'&&activelyPedaling)maxWorkoutSpeed=Math.max(maxWorkoutSpeed,speed);scroll+=speed*dt*13;updateRoadCoins(dt);const targetCadence=speed<0.7?0:Math.min(14,Math.max(2.5,speed*.46));animationCadence+=(targetCadence-animationCadence)*Math.min(1,dt*3.8);if(animationCadence>0.1)pedalPhase=(pedalPhase+animationCadence*dt)%4;const moved=speed*dt/3.6;meters+=moved;if(activelyPedaling)elapsed+=dt;points=Math.floor(meters/10);if(mode==='bike'&&activelyPedaling){const intensityMET=EFFORT_MET[effortLevel];calories+=Math.max(0,intensityMET-1)*3.5*CALORIE_WEIGHT_KG/200*dt/60}if(mode==='bike'){const totalDistanceCoins=Math.floor(meters/100);if(totalDistanceCoins>earnedDistance){progress.coins+=totalDistanceCoins-earnedDistance;earnedDistance=totalDistanceCoins;saveProgress()}if(meters>progress.best){progress.best=meters;saveProgress()}if(!recordAwarded&&meters>=startingBest+100&&meters>=100){recordAwarded=true;progress.coins+=25;sfx('record');saveProgress()}if(!goalAwarded&&elapsed>=600){goalAwarded=true;progress.coins+=50;sfx('goal');saveProgress()}}refreshRewards();el('speed').textContent=speed.toFixed(1)+' KM/H';el('distance').textContent=Math.round(meters)+' M';el('score').textContent='★ '+points}
 // Layered, deterministic pixel-art turbo flames; no allocations or particle state required.
 // Eight separate transparent fire sprites uploaded to the repository.
@@ -243,8 +306,16 @@ function drawSpeedAboveCyclist(){
 }
 function draw(){background();drawRoadCoins();cyclist();drawSpeedAboveCyclist();if(!playing)rect(0,0,960,540,'#07152222')}
 function frame(t){let dt=Math.min(.05,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
-el('play').onclick=()=>{mode=device?'bike':'demo';reset()};document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing){sfx('pause');recordWorkout();playing=false;el('finish').hidden=true;el('overlay').style.display='grid';el('status').textContent='PAUSADO • a aba foi ocultada'}});el('demo').onclick=()=>{mode='demo';reset()};el('pause').onclick=()=>{if(playing){sfx('pause');recordWorkout();playing=false;el('finish').hidden=true;el('overlay').style.display='grid';el('status').textContent='PAUSADO • clique JOGAR para iniciar novo treino'}};el('finish').onclick=()=>{setGameMenu(false);end()};window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowRight'){pressed=true;e.preventDefault()}});window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowRight')pressed=false});
-async function connect(){unlockAudio();sfx('click');try{if(!navigator.bluetooth)throw Error('Web Bluetooth indisponível neste navegador. Use Chrome com HTTPS.');el('status').textContent='PROCURANDO KWIKWI...';device=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}],optionalServices:[0x1826]});device.addEventListener('gattserverdisconnected',()=>{device=null;bikeSpeed=0;lastBikeDataAt=0;el('status').textContent='KWIKWI — DESCONECTADA'});let server=await device.gatt.connect(),service=await server.getPrimaryService(0x1826);characteristic=await service.getCharacteristic(0x2ad2);await characteristic.startNotifications();characteristic.addEventListener('characteristicvaluechanged',e=>{let v=e.target.value;if(v.byteLength<4)return;let flags=v.getUint16(0,true);if(!(flags&1)){bikeSpeed=v.getUint16(2,true)/100;lastBikeDataAt=performance.now()}else{bikeSpeed=0;lastBikeDataAt=performance.now()}el('status').textContent='KWIKWI — '+bikeSpeed.toFixed(1)+' KM/H'});mode='bike';el('status').textContent='KWIKWI CONECTADA!';}catch(e){el('status').textContent='ERRO: '+e.message;device=null}}el('connect').onclick=connect;
+el('play').onclick=()=>{if(paused)recordWorkout();mode=device?'bike':'demo';reset()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)pauseWorkout('PAUSADO AUTOMATICAMENTE • SEU TREINO CONTINUA AQUI')});
+el('demo').onclick=()=>{if(paused)recordWorkout();mode='demo';reset()};
+el('pause').onclick=()=>pauseWorkout('TREINO PAUSADO • CONTINUE QUANDO QUISER');
+el('resume').onclick=resumeWorkout;
+el('finishPaused').onclick=end;
+el('finish').onclick=end;
+window.addEventListener('keydown',e=>{if(mode!=='demo'||!playing||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'||e.code==='ArrowRight'){pressed=true;e.preventDefault()}});
+window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowRight')pressed=false});
+async function connect(){unlockAudio();sfx('click');try{if(!navigator.bluetooth)throw Error('Web Bluetooth indisponível neste navegador. Use Chrome com HTTPS.');el('status').textContent='PROCURANDO KWIKWI...';device=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}],optionalServices:[0x1826]});device.addEventListener('gattserverdisconnected',()=>{device=null;bikeSpeed=0;lastBikeDataAt=0;el('status').textContent='KWIKWI — DESCONECTADA';syncRideStatus();if(playing&&mode==='bike')pauseWorkout('KWIKWI DESCONECTADA • RECONECTE PARA CONTINUAR')});let server=await device.gatt.connect(),service=await server.getPrimaryService(0x1826);characteristic=await service.getCharacteristic(0x2ad2);await characteristic.startNotifications();characteristic.addEventListener('characteristicvaluechanged',e=>{let v=e.target.value;if(v.byteLength<4)return;let flags=v.getUint16(0,true);if(!(flags&1)){bikeSpeed=v.getUint16(2,true)/100;lastBikeDataAt=performance.now()}else{bikeSpeed=0;lastBikeDataAt=performance.now()}el('status').textContent='KWIKWI — '+bikeSpeed.toFixed(1)+' KM/H'});mode='bike';el('status').textContent='KWIKWI CONECTADA!';syncRideStatus();}catch(e){el('status').textContent='ERRO: '+e.message;device=null;syncRideStatus()}}el('connect').onclick=connect;
 
 const WORKOUT_HISTORY_KEY='pedal-rush-history-v1';
 let workoutHistory=[];
