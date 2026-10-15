@@ -150,72 +150,71 @@ function drawSpeedAboveCyclist(){
  const cx=220,cy=194,label=speed.toFixed(1)+' KM/H',t=performance.now()/1000;
  const heat=Math.max(0,Math.min(1,(speed-18)/24));
  if(heat>0){
-  const w=ctx.measureText(label).width+9,left=cx-w/2;
-  // The reference has a continuous fire silhouette rising ABOVE and just BELOW
-  // the text, not two disconnected rows of tongues.
-  const base=cy+14;
-  const glow=ctx.createRadialGradient(cx,cy,2,cx,cy,w*.53);
-  glow.addColorStop(0,'rgba(255,154,29,'+(.09+heat*.16)+')');
-  glow.addColorStop(1,'rgba(255,96,14,0)');
-  ctx.fillStyle=glow;ctx.fillRect(left-10,cy-54,w+20,85);
-  const n=Math.ceil(w/6);
+  const w=ctx.measureText(label).width+20,left=cx-w/2,topBase=cy+7;
+  // Warm translucent halo behind the entire readout, with no opaque background panel.
+  const glow=ctx.createRadialGradient(cx,cy-7,3,cx,cy-7,w*.65);
+  glow.addColorStop(0,'rgba(255,226,93,'+(.2+heat*.3)+')');
+  glow.addColorStop(.55,'rgba(255,100,25,'+(.12+heat*.17)+')');
+  glow.addColorStop(1,'rgba(255,55,10,0)');
+  ctx.fillStyle=glow;ctx.fillRect(left-20,cy-75,w+40,110);
+  // Curved tongues are staggered and phase-shifted to resemble real dancing fire.
+  function tongue(x,base,height,wide,phase){
+   const sway=Math.sin(t*6.4+phase)*wide*.55;
+   for(let layer=0;layer<3;layer++){
+    const scale=[1,.76,.49][layer],h=height*scale;
+    const spread=wide*scale;
+    ctx.fillStyle=['#d6371e','#ff8527','#ffe16a'][layer];
+    ctx.beginPath();
+    ctx.moveTo(x-spread,base);
+    ctx.bezierCurveTo(x-spread*1.12,base-h*.42,x+sway-spread*.6,base-h*.82,x+sway,base-h);
+    ctx.bezierCurveTo(x+sway+spread*.36,base-h*.68,x+spread*1.08,base-h*.4,x+spread,base);
+    ctx.closePath();ctx.fill();
+   }
+   if(heat>.6){ctx.fillStyle='#fff4ad';ctx.fillRect(Math.round(x-1),Math.round(base-height*.24),2,Math.round(height*.15))}
+  }
+  const n=18;
   for(let i=0;i<n;i++){
    const x=left+(i+.5)*w/n;
-   const wave=Math.sin(t*8.7+i*1.81),slow=Math.sin(t*4.3+i*.73);
-   const height=(17+heat*26)*(.72+.18*wave+.10*slow);
-   const tipX=x+Math.sin(t*5.2+i*1.4)*3;
-   // Flame base sits only a few pixels below the letters, with tiny flickering licks.
-   const tipY=base-height;
-   const ww=5.5;
-   ctx.fillStyle='#df3b20';
-   ctx.beginPath();ctx.moveTo(x-ww,base);
-   ctx.bezierCurveTo(x-ww*1.15,base-height*.45,tipX-ww*.5,tipY+height*.25,tipX,tipY);
-   ctx.bezierCurveTo(tipX+ww*.6,tipY+height*.42,x+ww,base-height*.35,x+ww,base);
-   ctx.closePath();ctx.fill();
-   ctx.fillStyle='#ff8c29';
-   ctx.beginPath();ctx.moveTo(x-3.4,base);
-   ctx.quadraticCurveTo(x-3,base-height*.55,tipX,base-height*.79);
-   ctx.quadraticCurveTo(x+3,base-height*.42,x+3.4,base);
-   ctx.closePath();ctx.fill();
-   ctx.fillStyle='#ffd85a';
-   ctx.beginPath();ctx.moveTo(x-1.9,base);
-   ctx.quadraticCurveTo(x-2,base-height*.3,x,base-height*.54);
-   ctx.quadraticCurveTo(x+2,base-height*.26,x+1.9,base);
-   ctx.closePath();ctx.fill();
+   const flutter=.72+.28*Math.sin(t*10.3+i*2.12);
+   const h=(18+heat*42)*flutter*(.84+.16*Math.sin(i*1.41+t*3));
+   tongue(x,topBase,h,4.4+heat*2.3,i*1.63);
   }
-  // A narrow, continuous wavering fringe BELOW the number (as marked in red).
-  ctx.strokeStyle='#ef4d22';ctx.lineWidth=2.7;ctx.beginPath();
-  for(let i=0;i<=Math.ceil(w/4);i++){
-   const x=left+i*4;
-   const y=cy+15+2.5*Math.sin(i*1.7+t*9)+1.5*Math.sin(i*.55-t*6);
-   if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  // Smaller flames lick upward from BELOW the number, without obscuring it.
+  for(let i=0;i<14;i++){
+   const x=left+6+(i+.5)*(w-12)/14;
+   const flutter=.7+.3*Math.sin(t*9.5+i*2.31);
+   const h=(6+heat*11)*flutter;
+   tongue(x,cy+23,h,3.2+heat*.8,i*2.17+4);
   }
-  ctx.stroke();
-  // Tiny bright pockets, restricted to the lower fringe.
-  ctx.fillStyle='#ffc348';
-  for(let i=0;i<Math.floor(6+heat*6);i++){
-   const x=left+(i+.5)*w/(6+Math.floor(heat*6));
-   const y=cy+13+Math.sin(i*2.1+t*8)*2;
-   ctx.fillRect(Math.round(x),Math.round(y),3,2);
-  }
-  for(let i=0;i<Math.floor(3+heat*10);i++){
-   const life=(t*(.65+heat*.65)+i*.297)%1;
-   const x=left+((i*39.7+Math.sin(t+i)*7)%w+w)%w;
-   const y=cy-12-life*(20+heat*36);
-   ctx.globalAlpha=(1-life)*(.3+heat*.55);
-   ctx.fillStyle=i%3?'#ffac40':'#fff0a4';
-   ctx.fillRect(Math.round(x),Math.round(y),2,2);
+  // Pixel embers with varied upward drift and fading.
+  const sparks=Math.floor(7+heat*23);
+  for(let i=0;i<sparks;i++){
+   const life=(t*(.55+heat*.85)+i*.381)%1;
+   const x=left+((i*37.91+Math.sin(t*2+i*3)*10)%w+w)%w;
+   const y=cy-3-life*(36+heat*58);
+   ctx.globalAlpha=(1-life)*(.35+heat*.65);
+   ctx.fillStyle=i%5===0?'#fff8c6':i%2===0?'#ffba42':'#f35a24';
+   const size=i%5===0?3:2;
+   ctx.fillRect(Math.round(x),Math.round(y),size,size+(i%4===0?2:0));
   }
   ctx.globalAlpha=1;
+  // Tiny heat streaks at full sprint.
+  if(heat>.7){ctx.fillStyle='#ffcc58';for(let i=0;i<5;i++){
+   const x=left+((t*44+i*39)%w);
+   ctx.fillRect(Math.round(x),Math.round(cy-35-i%3*10),3+Math.round(heat*3),2);
+  }}
  }
+ // Crisp black outline separates the animated rainbow digits from the flames.
  ctx.lineWidth=6;ctx.strokeStyle='#08060d';ctx.strokeText(label,cx,cy);
  if(heat>.04){
   const width=ctx.measureText(label).width;
   const rgb=ctx.createLinearGradient(cx-width/2,0,cx+width/2,0);
-  for(let i=0;i<=16;i++)rgb.addColorStop(i/16,'hsl('+(((i/16+t*.22)%1)*360)+',100%,72%)');
+  const shift=t*.22;
+  for(let i=0;i<=16;i++)rgb.addColorStop(i/16,'hsl('+(((i/16+shift)%1)*360)+',100%,72%)');
   ctx.fillStyle=rgb;
  }else ctx.fillStyle='#fff2d4';
- ctx.fillText(label,cx,cy);ctx.restore();
+ ctx.fillText(label,cx,cy);
+ ctx.restore();
 }
 function draw(){background();drawRoadCoins();cyclist();drawSpeedAboveCyclist();if(!playing)rect(0,0,960,540,'#07152222')}
 function frame(t){let dt=Math.min(.05,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
