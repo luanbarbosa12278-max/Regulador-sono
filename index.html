@@ -199,21 +199,13 @@ rect(0,422,960,18,'#b9b6ac');for(let i=0;i<40;i++)rect(i*27,422,2,16,'#656b73');
 
 const sceneImages={};for(const [id,filename] of [['beach','Praia.png'],['forest','Floresta.png'],['neon','Neon.png']]){const img=new Image();img.src=filename;sceneImages[id]=img}
 function drawTiledScene(img){
- // A largura de cada cena é 960px (proporção 16:9), igual ao canvas.
- // As extremidades são espelhadas em faixas curtas para evitar cortes visíveis.
- const tileWidth=W,blend=0,step=tileWidth;
- const position=((scroll%step)+step)%step;
- const startIndex=Math.floor(scroll/step);
+ // Repete a arte sem inverter horizontalmente: evita efeito de espelho no centro.
+ const tileWidth=W;
+ const position=((scroll%tileWidth)+tileWidth)%tileWidth;
  ctx.save();
  ctx.imageSmoothingEnabled=false;
- for(let i=0,x=-position;x<W;i++,x+=step){
-  const index=startIndex+i;
-  const flip=index%2!==0;
-  ctx.save();
-  if(flip){ctx.translate(Math.round(x)+tileWidth,0);ctx.scale(-1,1);ctx.drawImage(img,0,0,tileWidth,540)}
-  else ctx.drawImage(img,Math.round(x),0,tileWidth,540);
-  ctx.restore();
-
+ for(let x=-position;x<W;x+=tileWidth){
+  ctx.drawImage(img,Math.round(x),0,tileWidth,540);
  }
  ctx.restore();
 }
