@@ -192,21 +192,31 @@ el('sound').onclick=()=>{soundEnabled=!soundEnabled;try{localStorage.setItem('pe
 
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
 function text(t,x,y,size=20,color='#fff'){ctx.fillStyle='#172239';ctx.font=size+"px 'Press Start 2P', monospace";ctx.fillText(t,x+2,y+3);ctx.fillStyle=color;ctx.fillText(t,x,y)}
-const sceneImage=new Image();sceneImage.src='Cenario.png';let sceneReady=false;sceneImage.onload=()=>sceneReady=true;function background(){if(equippedScene!=='city'){const scene=sceneImages[equippedScene];if(scene&&scene.complete&&scene.naturalWidth){drawTiledScene(scene);return}drawAlternateScene(equippedScene);return}if(sceneReady){const tileWidth=960*sceneImage.naturalWidth/sceneImage.naturalHeight;
-const tileIndex=Math.floor(scroll/tileWidth),offset=((scroll%tileWidth)+tileWidth)%tileWidth;
-for(let i=0,x=-offset;x<960;i++,x+=tileWidth){
- const index=tileIndex+i;
- const dx=Math.round(x),dw=Math.round(x+tileWidth)-dx;
- if(index%2===0){ctx.drawImage(sceneImage,dx,0,dw,540)}
- else{ctx.save();ctx.translate(dx+dw,0);ctx.scale(-1,1);ctx.drawImage(sceneImage,0,0,dw,540);ctx.restore()}
-}
-return;}rect(0,0,W,540,'#319be9');for(let i=0;i<18;i++){let x=((i*141-scroll*.08)%1250+1250)%1250-130,y=38+(i*47)%105;rect(x,y,85,17,'#e6f5ff');rect(x+18,y-12,44,16,'#f8f5dd')}
+const sceneImage=new Image();sceneImage.src='Cenario.png';let sceneReady=false;sceneImage.onload=()=>sceneReady=true;function background(){if(equippedScene!=='city'){const scene=sceneImages[equippedScene];if(scene&&scene.complete&&scene.naturalWidth){drawTiledScene(scene);return}drawAlternateScene(equippedScene);return}if(sceneReady){drawTiledScene(sceneImage);return;}rect(0,0,W,540,'#319be9');for(let i=0;i<18;i++){let x=((i*141-scroll*.08)%1250+1250)%1250-130,y=38+(i*47)%105;rect(x,y,85,17,'#e6f5ff');rect(x+18,y-12,44,16,'#f8f5dd')}
 rect(0,300,960,140,'#5b9c70');for(let i=0;i<22;i++){let x=((i*74-scroll*.23)%1120+1120)%1120-90,h=80+(i*39)%140;rect(x,330-h,48,h,'#6a92ae');for(let j=0;j<3;j++)for(let k=0;k<6;k++)rect(x+7+j*13,340-h+k*21,5,8,'#f8db92')}
 for(let i=0;i<14;i++){let x=((i*112-scroll*.53)%1220+1220)%1220-115;rect(x,285,104,134,['#f1b05e','#6ab9d4','#e57f68','#98c681'][i%4]);rect(x-5,277,114,12,'#a74e3f');rect(x+15,322,26,32,'#344a63');rect(x+61,315,25,50,'#394b57');rect(x,418,104,5,'#f7d8a5')}
 rect(0,422,960,18,'#b9b6ac');for(let i=0;i<40;i++)rect(i*27,422,2,16,'#656b73');rect(0,440,960,100,'#414857');rect(0,445,960,3,'#687081');for(let i=0;i<12;i++){let x=((i*116-scroll*1.2)%1200+1200)%1200-110;rect(x,492,61,5,'#f7eac2')}}
 
 const sceneImages={};for(const [id,filename] of [['beach','Praia.png'],['forest','Floresta.png'],['neon','Neon.png']]){const img=new Image();img.src=filename;sceneImages[id]=img}
-function drawTiledScene(img){const tileWidth=540*img.naturalWidth/img.naturalHeight;if(!Number.isFinite(tileWidth)||tileWidth<=0)return;const tileIndex=Math.floor(scroll/tileWidth),offset=((scroll%tileWidth)+tileWidth)%tileWidth;for(let i=0,x=-offset;x<960;i++,x+=tileWidth){const dx=Math.round(x),dw=Math.round(x+tileWidth)-dx;if((tileIndex+i)%2===0){ctx.drawImage(img,dx,0,dw,540)}else{ctx.save();ctx.translate(dx+dw,0);ctx.scale(-1,1);ctx.drawImage(img,0,0,dw,540);ctx.restore()}}}
+function drawTiledScene(img){
+ // A largura de cada cena é 960px (proporção 16:9), igual ao canvas.
+ // As extremidades são espelhadas em faixas curtas para evitar cortes visíveis.
+ const tileWidth=W,blend=0,step=tileWidth;
+ const position=((scroll%step)+step)%step;
+ const startIndex=Math.floor(scroll/step);
+ ctx.save();
+ ctx.imageSmoothingEnabled=false;
+ for(let i=0,x=-position;x<W;i++,x+=step){
+  const index=startIndex+i;
+  const flip=index%2!==0;
+  ctx.save();
+  if(flip){ctx.translate(Math.round(x)+tileWidth,0);ctx.scale(-1,1);ctx.drawImage(img,0,0,tileWidth,540)}
+  else ctx.drawImage(img,Math.round(x),0,tileWidth,540);
+  ctx.restore();
+
+ }
+ ctx.restore();
+}
 const SCENES=[{id:'city',name:'CIDADE ORIGINAL',price:0,emoji:'🏙️',desc:'O cenário clássico do PEDAL RUSH.'},{id:'beach',name:'PRAIA TROPICAL',price:500,emoji:'🌴',desc:'Mar azul, coqueiros e areia dourada.'},{id:'forest',name:'FLORESTA VERDE',price:1200,emoji:'🌲',desc:'Montanhas e árvores pela estrada.'},{id:'neon',name:'CIDADE NEON',price:2500,emoji:'🌃',desc:'Noite, prédios e luzes de neon.'}];
 const SCENE_KEY='pedal-rush-scenes-v1';let ownedScenes=['city'],equippedScene='city';
 try{const saved=JSON.parse(localStorage.getItem(SCENE_KEY)||'{}');if(Array.isArray(saved.owned))ownedScenes=['city',...saved.owned.filter(id=>SCENES.some(x=>x.id===id))];if(ownedScenes.includes(saved.equipped))equippedScene=saved.equipped}catch(e){}
